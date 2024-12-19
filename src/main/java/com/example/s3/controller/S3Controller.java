@@ -6,16 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 
 @RestController
-@RequestMapping("/upload")
+@RequestMapping("/s3")
 @RequiredArgsConstructor
 public class S3Controller {
 
@@ -24,7 +25,7 @@ public class S3Controller {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @PostMapping
+    @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
@@ -35,6 +36,22 @@ public class S3Controller {
             amazonS3Client.putObject(bucket,fileName,file.getInputStream(),metadata);
             return ResponseEntity.ok(fileUrl);
         } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/delete")
+    public ResponseEntity<String> s3delete(@RequestParam String image){
+        try {
+            boolean isObjectExist = amazonS3Client.doesObjectExist(bucket, image);
+            if (isObjectExist) {
+                amazonS3Client.deleteObject(bucket, image);
+                return ResponseEntity.ok(image);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
