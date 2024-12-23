@@ -2,7 +2,10 @@ package com.example.s3.controller;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.s3.adapter.S3Port;
+import com.example.s3.domain.S3Image;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,9 @@ import java.io.IOException;
 @RequestMapping("/s3")
 @RequiredArgsConstructor
 public class S3Controller {
+
+    @Autowired
+    private final S3Port s3Port;
 
     private final AmazonS3Client amazonS3Client;
 
@@ -30,6 +36,9 @@ public class S3Controller {
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
             amazonS3Client.putObject(bucket,fileName,file.getInputStream(),metadata);
+
+            s3Port.save(new S3Image(fileUrl));
+
             return ResponseEntity.ok(fileUrl);
         } catch (IOException e) {
             e.printStackTrace();
