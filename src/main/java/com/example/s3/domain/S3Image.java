@@ -18,7 +18,7 @@ public class S3Image {
     private String image;
 
     public S3Image(final String image) {
-        Assert.hasText(image, "이미지 경로는 필수입니다.");
+        Assert.hasText(image, "이미지 Url은 필수입니다.");
         this.image = image;
     }
 }
