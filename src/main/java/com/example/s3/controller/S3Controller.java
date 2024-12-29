@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/s3")
+@RequestMapping("/s3/")
 @RequiredArgsConstructor
 public class S3Controller {
 
@@ -27,7 +27,7 @@ public class S3Controller {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @PostMapping("/upload")
+    @PostMapping("upload")
     public ResponseEntity<String> uploadMultipartFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
@@ -46,7 +46,7 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("/delete")
+    @GetMapping("delete")
     public ResponseEntity<String> deleteFile(@RequestParam String image){
         try {
             if (amazonS3Client.doesObjectExist(bucket, image)) {
