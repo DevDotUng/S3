@@ -13,21 +13,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/s3/")
+@RequestMapping("/s3")
 @RequiredArgsConstructor
 public class S3Controller {
 
     @Autowired
-    private final S3Port s3Port;
+    private S3Port s3Port;
 
-    private final AmazonS3Client amazonS3Client;
+    private AmazonS3Client amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @PostMapping("upload")
+    @PostMapping("/upload")
     public ResponseEntity<String> uploadMultipartFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
@@ -46,7 +47,7 @@ public class S3Controller {
         }
     }
 
-    @GetMapping("delete")
+    @GetMapping("/delete")
     public ResponseEntity<String> deleteFile(@RequestParam String image){
         try {
             if (amazonS3Client.doesObjectExist(bucket, image)) {
@@ -59,5 +60,10 @@ public class S3Controller {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/image")
+    public ResponseEntity<List<S3Image>> getFile(){
+        return ResponseEntity.ok(s3Port.getImage());
     }
 }
