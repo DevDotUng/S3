@@ -7,10 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class MockS3Config {
+public class MockS3Config extends S3Config {
 
     @Bean
-    public AmazonS3Client mockAmazonS3Client() {
+    @Primary
+    @Override
+    public AmazonS3Client amazonS3Client() {
         return Mockito.mock(AmazonS3Client.class);
     }
 }

@@ -49,7 +49,7 @@ public class S3Controller {
     }
 
     @GetMapping("/delete")
-    public ResponseEntity<String> deleteFile(@RequestParam String image){
+    public ResponseEntity<String> deleteFile(@RequestParam("image") String image){
         try {
             if (amazonS3Client.doesObjectExist(bucket, image)) {
                 amazonS3Client.deleteObject(bucket, image);

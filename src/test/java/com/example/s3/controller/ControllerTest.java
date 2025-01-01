@@ -9,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,11 +19,17 @@ import java.net.URL;
 import static com.example.s3.S3Steps.이미지_생성;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class ControllerTest extends ApiTest {
+
+    final String imageUrl = "https://s3-ung-sample.s3.ap-northeast-2.amazonaws.com/testImage.png";
+
+    final String imageName = "testImage.png";
 
     @Autowired
     private S3Repository s3Repository;
@@ -30,13 +38,13 @@ public class ControllerTest extends ApiTest {
     private MockMvc mvc;
 
     @Autowired
-    private AmazonS3Client mockAmazonS3Client;
+    private AmazonS3Client amazonS3Client;
 
     @BeforeEach
     void beforeEach() throws MalformedURLException {
-        final String url = "https://s3-ung-sample.s3.ap-northeast-2.amazonaws.com/testImage.png";
-        given(mockAmazonS3Client.putObject(any(PutObjectRequest.class))).willReturn(new PutObjectResult());
-        given(mockAmazonS3Client.getUrl(any(), any())).willReturn(new URL(url));
+        given(amazonS3Client.putObject(any(PutObjectRequest.class))).willReturn(new PutObjectResult());
+        given(amazonS3Client.doesObjectExist(any(), any())).willReturn(true);
+        doNothing().when(amazonS3Client).deleteObject(any(), any());
     }
 
     @Test
@@ -49,13 +57,11 @@ public class ControllerTest extends ApiTest {
         ).andExpect(status().isOk());
     }
 
-//    @Test
-//    void 이미지_삭제() throws Exception {
-//        final var file = 이미지_생성();
-//
-//        mvc.perform(
-//                multipart("/s3/upload")
-//                        .file(file)
-//        ).andExpect(status().isOk());
-//    }
+    @Test
+    void 이미지_삭제() throws Exception {
+        mvc.perform(
+                MockMvcRequestBuilders.get("/s3/delete")
+                        .param("image", imageName)
+        ).andExpect(status().isOk());
+    }
 }
