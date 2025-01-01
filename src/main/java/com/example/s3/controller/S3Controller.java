@@ -23,6 +23,7 @@ public class S3Controller {
     @Autowired
     private S3Port s3Port;
 
+    @Autowired
     private AmazonS3Client amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
