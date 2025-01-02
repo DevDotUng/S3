@@ -5,29 +5,35 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.example.s3.ApiTest;
 import com.example.s3.adapter.S3Repository;
+import com.example.s3.domain.S3Image;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 import static com.example.s3.S3Steps.이미지_생성;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class ControllerTest extends ApiTest {
 
-    final String imageUrl = "https://s3-ung-sample.s3.ap-northeast-2.amazonaws.com/testImage.png";
+    final String imageUrl = "https://s3-ung-sample/test/testImage.png";
 
     final String imageName = "testImage.png";
 
@@ -63,5 +69,27 @@ public class ControllerTest extends ApiTest {
                 MockMvcRequestBuilders.get("/s3/delete")
                         .param("image", imageName)
         ).andExpect(status().isOk());
+    }
+
+    @Test
+    void 이미지_조회() throws Exception {
+        final var file = 이미지_생성();
+
+        mvc.perform(
+                multipart("/s3/upload")
+                        .file(file)
+        );
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/s3/image"))
+                .andExpect(status().isOk())
+                .andDo(print()).andReturn();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<S3Image> after = mapper.readValue(
+                result.getResponse().getContentAsString()
+                , new TypeReference<>(){});
+
+        assertThat(after.get(0).getImage()).isEqualTo(imageUrl);
     }
 }
