@@ -47,7 +47,7 @@ public class ControllerTest extends ApiTest {
     private AmazonS3Client amazonS3Client;
 
     @BeforeEach
-    void beforeEach() throws MalformedURLException {
+    void beforeEach() {
         given(amazonS3Client.putObject(any(PutObjectRequest.class))).willReturn(new PutObjectResult());
         given(amazonS3Client.doesObjectExist(any(), any())).willReturn(true);
         doNothing().when(amazonS3Client).deleteObject(any(), any());
