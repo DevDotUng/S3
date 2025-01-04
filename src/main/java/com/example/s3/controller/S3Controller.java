@@ -30,7 +30,7 @@ public class S3Controller {
     private String bucket;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadMultipartFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = file.getOriginalFilename();
             String fileUrl = "https://" + bucket + "/test/" +fileName;
