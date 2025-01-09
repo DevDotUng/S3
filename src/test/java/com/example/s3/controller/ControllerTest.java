@@ -38,7 +38,7 @@ public class ControllerTest extends ApiTest {
     private S3Repository s3Repository;
 
     @Autowired
-    private MockMvc mvc;
+    private MockMvc mockMvc;
 
     @Autowired
     private AmazonS3Client amazonS3Client;
@@ -54,7 +54,7 @@ public class ControllerTest extends ApiTest {
     void 이미지_등록() throws Exception {
         final var file = 이미지_생성();
 
-        mvc.perform(
+        mockMvc.perform(
                 multipart("/s3/upload")
                         .file(file)
         ).andExpect(status().isOk());
@@ -62,7 +62,7 @@ public class ControllerTest extends ApiTest {
 
     @Test
     void 이미지_삭제() throws Exception {
-        mvc.perform(
+        mockMvc.perform(
                 MockMvcRequestBuilders.get("/s3/delete")
                         .param("image", imageName)
         ).andExpect(status().isOk());
@@ -72,12 +72,12 @@ public class ControllerTest extends ApiTest {
     void 이미지_조회() throws Exception {
         final var file = 이미지_생성();
 
-        mvc.perform(
+        mockMvc.perform(
                 multipart("/s3/upload")
                         .file(file)
         );
 
-        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/s3/image"))
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/s3/image"))
                 .andExpect(status().isOk())
                 .andDo(print()).andReturn();
 
